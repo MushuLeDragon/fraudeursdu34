@@ -1,7 +1,7 @@
 <template>
   <div class="data-container">
     <p>
-      <input type="text" v-model="username" placeholder="Nom d'utilisateur" />
+      <input type="text" @keyup.enter="connect" v-model="username" placeholder="Nom d'utilisateur" autofocus />
       <br><br>
       <button type="button" @click="connect">Se connecter</button>
     </p>
