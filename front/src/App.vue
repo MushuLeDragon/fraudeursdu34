@@ -45,7 +45,20 @@ export default {
 }
 
 a {
+  position: relative;
   color: #42b983;
+  text-decoration: none;
+}
+
+a:hover::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  bottom: -7px;
+  height: 4px;
+  background-color: #42b983;
+  width: 80%;
+  height: 2px;
 }
 
 th, td {
