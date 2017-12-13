@@ -13,9 +13,9 @@
     <br><br>
     <strong>Ville d'arrivée</strong> : {{ villeArrivee }}
     <br><br>
-    <strong>Horaire de départ</strong> : {{ heureDepart.toLocaleString() }}
+    <strong>Horaire de départ</strong> : {{ heureDepart && new Date(heureDepart).toLocaleString() }}
     <br><br>
-    <button>
+    <button @click="placeReservation">
       Réserver
     </button>
   </template>
@@ -24,14 +24,12 @@
 </template>
 
 <script>
-const getTrain = numTrain => ({
-  numTrain: 'ABCDEF123',
-  villeDepart: 'Montpellier',
-  villeArrivee: 'Paris',
-  heureDepart: new Date()
-})
-
-const placeReservation = (username, numTrain) => {}
+// const getTrain = numTrain => ({
+//   numTrain: 'ABCDEF123',
+//   villeDepart: 'Montpellier',
+//   villeArrivee: 'Paris',
+//   heureDepart: new Date()
+// })
 
 export default {
   name: 'train',
@@ -44,8 +42,23 @@ export default {
   }),
 
   methods: {
-    updateTrain () {
-      const train = getTrain()
+    async updateTrain () {
+      let train
+
+      try {
+        const trainResponse = await this.axios.get(`/api/trains/${this.$route.params.id}`)
+
+        if (trainResponse.status !== 200) {
+          throw new Error('Erreur de récupération des trains')
+        }
+
+        train = trainResponse.data
+      } catch (e) {
+        console.error(e)
+        // train = getTrain()
+      }
+
+      // console.log(train)
 
       this.numTrain = train.numTrain
       this.villeDepart = train.villeDepart
@@ -54,7 +67,19 @@ export default {
     },
 
     placeReservation () {
-      placeReservation(this.$store.getters.username, this.numTrain)
+      try {
+        const payload = {
+          numReservation: Date.now(),
+          username: this.$store.getters.username,
+          currentTrain: this.numTrain,
+          numberPlaces: 1
+        }
+
+        this.axios.post(`/api/reservations`, payload)
+      } catch (e) {
+        console.error(e)
+        // Afficher "impossible de créer la réservation ..."
+      }
     }
   },
 

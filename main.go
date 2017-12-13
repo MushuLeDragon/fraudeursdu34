@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var apiURI = "127.0.0.1"
+var apiURI = "localhost:3000"
 
 // App is the FraudeursDu3-4 application
 type App struct {
@@ -24,6 +24,7 @@ func (app *App) initializeRouter() {
 	app.Router = gin.Default()
 
 	app.Router.StaticFile("/", "front/dist/index.html")
+	app.Router.Static("/static", "front/dist/static")
 
 	api := app.Router.Group("/api")
 
@@ -83,6 +84,12 @@ func main() {
 	// Default value for $PORT
 	if port == "" {
 		port = "8880"
+	}
+
+	api := os.Getenv("API_URL")
+
+	if api != "" {
+		apiURI = api
 	}
 
 	app := App{}

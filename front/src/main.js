@@ -2,6 +2,8 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VueAxios from 'vue-axios'
+import axios from 'axios'
 
 import App from './App'
 import router from './router'
@@ -9,6 +11,9 @@ import router from './router'
 Vue.config.productionTip = false
 
 Vue.use(Vuex)
+Vue.use(VueAxios, axios)
+
+Vue.axios.defaults.baseURL = 'http://localhost:8880'
 
 const store = new Vuex.Store({
   state: {

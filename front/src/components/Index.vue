@@ -10,20 +10,18 @@
           <thead>
             <tr>
               <th>Numéro</th>
-              <th>Date</th>
               <th>Train</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="res in reservations" :key="res.numero">
-              <td v-html="res.numero"></td>
-              <td v-html="res.date.toLocaleDateString()"></td>
+              <td v-html="res.numReservation"></td>
               <td>
-                <a :href="`#/train/${res.numTrain}`">{{ res.numTrain }}</a>
+                <a :href="`#/train/${res.currentTrain}`">{{ res.currentTrain }}</a>
               </td>
               <td>
-                <button>Annuler</button>
+                <button @click="cancelReservation(res.numReservation)">Annuler</button>
               </td>
             </tr>
           </tbody>
@@ -54,7 +52,7 @@
               </td>
               <td v-html="train.villeDepart"></td>
               <td v-html="train.villeArrivee"></td>
-              <td v-html="train.heureDepart.toLocaleString()"></td>
+              <td v-html="train.heureDepart && new Date(train.heureDepart).toLocaleString()"></td>
             </tr>
           </tbody>
         </table>
@@ -64,41 +62,41 @@
 </template>
 
 <script>
-const getTrains = () => [{
-  numTrain: 'ABCDEF123',
-  villeDepart: 'Montpellier',
-  villeArrivee: 'Paris',
-  heureDepart: new Date()
-}, {
-  numTrain: 'ABCDEF123',
-  villeDepart: 'Montpellier',
-  villeArrivee: 'Paris',
-  heureDepart: new Date()
-}, {
-  numTrain: 'ABCDEF123',
-  villeDepart: 'Montpellier',
-  villeArrivee: 'Paris',
-  heureDepart: new Date()
-}, {
-  numTrain: 'ABCDEF123',
-  villeDepart: 'Montpellier',
-  villeArrivee: 'Paris',
-  heureDepart: new Date()
-}]
+// const getTrains = () => [{
+//   numTrain: 'ABCDEF123',
+//   villeDepart: 'Montpellier',
+//   villeArrivee: 'Paris',
+//   heureDepart: new Date()
+// }, {
+//   numTrain: 'ABCDEF123',
+//   villeDepart: 'Montpellier',
+//   villeArrivee: 'Paris',
+//   heureDepart: new Date()
+// }, {
+//   numTrain: 'ABCDEF123',
+//   villeDepart: 'Montpellier',
+//   villeArrivee: 'Paris',
+//   heureDepart: new Date()
+// }, {
+//   numTrain: 'ABCDEF123',
+//   villeDepart: 'Montpellier',
+//   villeArrivee: 'Paris',
+//   heureDepart: new Date()
+// }]
 
-const getReservations = (name) => [{
-  numero: '1',
-  date: new Date(),
-  numTrain: 'ABCDEF123'
-}, {
-  numero: '1',
-  date: new Date(),
-  numTrain: 'ABCDEF123'
-}, {
-  numero: '1',
-  date: new Date(),
-  numTrain: 'ABCDEF123'
-}]
+// const getReservations = (name) => [{
+//   numero: '1',
+//   date: new Date(),
+//   numTrain: 'ABCDEF123'
+// }, {
+//   numero: '1',
+//   date: new Date(),
+//   numTrain: 'ABCDEF123'
+// }, {
+//   numero: '1',
+//   date: new Date(),
+//   numTrain: 'ABCDEF123'
+// }]
 
 export default {
   name: 'Index',
@@ -107,9 +105,43 @@ export default {
     reservations: null
   }),
 
-  created () {
-    this.trains = getTrains()
-    this.reservations = getReservations(this.$store.getters.username)
+  async created () {
+    this.updateReservations()
+
+    try {
+      const trainsResponse = await this.axios.get(`/api/trains`)
+
+      if (trainsResponse.status !== 200) {
+        throw new Error('Erreur de récupération des trains')
+      }
+
+      this.trains = trainsResponse.data
+    } catch (e) {
+      console.error(e)
+      // this.trains = getTrains()
+    }
+  },
+
+  methods: {
+    async cancelReservation (numero) {
+      await this.axios.delete(`/api/reservations/${numero}`)
+      this.updateReservations()
+    },
+
+    async updateReservations () {
+      try {
+        const reservationsResponse = await this.axios.get(`/api/reservations?username=${this.$store.getters.username}`)
+
+        if (reservationsResponse.status !== 200) {
+          throw new Error('Erreur de récupération des réservations')
+        }
+
+        this.reservations = reservationsResponse.data.filter(x => x.username === this.$store.getters.username)
+      } catch (e) {
+        console.error(e)
+        // this.reservations = getReservations(this.$store.getters.username)
+      }
+    }
   }
 }
 </script>
