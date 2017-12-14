@@ -58,6 +58,9 @@
         </table>
       </template>
     </center>
+
+    <br><br>
+    <button @click="updateData">Rafraîchir</button>
   </div>
 </template>
 
@@ -107,25 +110,18 @@ export default {
 
   async created () {
     this.updateReservations()
-
-    try {
-      const trainsResponse = await this.axios.get(`/api/trains`)
-
-      if (trainsResponse.status !== 200) {
-        throw new Error('Erreur de récupération des trains')
-      }
-
-      this.trains = trainsResponse.data
-    } catch (e) {
-      console.error(e)
-      // this.trains = getTrains()
-    }
+    this.updateTrains()
   },
 
   methods: {
     async cancelReservation (numero) {
       await this.axios.delete(`/api/reservations/${numero}`)
       this.updateReservations()
+    },
+
+    updateData () {
+      this.updateReservations()
+      this.updateTrains()
     },
 
     async updateReservations () {
@@ -140,6 +136,21 @@ export default {
       } catch (e) {
         console.error(e)
         // this.reservations = getReservations(this.$store.getters.username)
+      }
+    },
+
+    async updateTrains () {
+      try {
+        const trainsResponse = await this.axios.get(`/api/trains`)
+
+        if (trainsResponse.status !== 200) {
+          throw new Error('Erreur de récupération des trains')
+        }
+
+        this.trains = trainsResponse.data
+      } catch (e) {
+        console.error(e)
+        // this.trains = getTrains()
       }
     }
   }
